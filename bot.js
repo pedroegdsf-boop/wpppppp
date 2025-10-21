@@ -1,5 +1,5 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode'); // Usando a biblioteca 'qrcode'
 const express = require('express');
 
 // --- Início do Servidor Web (para o Render) ---
@@ -20,22 +20,31 @@ const client = new Client({
     puppeteer: {
         args: ['--no-sandbox'],
     },
-    // Correção para o erro de cache no Render
     webVersionCache: {
       type: 'remote',
       remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
     }
 });
 
+// --- Início da Geração do QR Code como Link de Imagem ---
 client.on('qr', (qr) => {
-    qrcode.generate(qr, { small: true });
+  qrcode.toDataURL(qr, (err, url) => {
+    if(err) throw err;
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    console.log('!!!     O LINK PARA A IMAGEM DO QR CODE ESTÁ ABAIXO     !!!');
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    console.log(url);
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+    console.log('!!! COPIE O LINK ACIMA E COLE NO SEU NAVEGADOR !!!');
+    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  });
 });
+// --- Fim da Geração do QR Code ---
 
 client.on('ready', () => {
     console.log('🤖 Bot pronto!');
 });
 
-// Evento de mensagem corrigido para 'message_create'
 client.on('message_create', async (msg) => {
     const texto = msg.body.toLowerCase();
 
@@ -127,11 +136,10 @@ Sua fundação ocorreu sob condições extremamente adversas, exigindo sacrifíc
 
 Atualmente, a Zona Oeste é um território marcado pela desigualdade e pela degradação ambiental. Os Humanos que vivem na área são frequentemente vítimas de opressão militar, submetidos a políticas de controle e exploração. Essa condição tem gerado revoltas e manifestações periódicas, geralmente reprimidas com violência.
 
-O entorno da região apresenta altos índices de contaminação. Toneladas de lixo e resíduos industriais se acumulam nas margens, poluindo o solo e as fontes de água. A economia local depende em grande parte da reciclagem e reaproveitamento desses materiais, o que transforma o lixo em principal meio de subsistência para a população.
+O entorno da região apresenta altos índices de contaminaço. Toneladas de lixo e resíduos industriais se acumulam nas margens, poluindo o solo e as fontes de água. A economia local depende em grande parte da reciclagem e reaproveitamento desses materiais, o que transforma o lixo em principal meio de subsistência para a população.
 
 Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua localização costeira favorece o transporte marítimo e a movimentação clandestina de mercadorias, tornando-a uma área de interesse constante tanto para o Governo Mundial quanto para organizações independentes e facções insurgentes.`;
             
-            // Sintaxe de envio de mídia corrigida
             return await client.sendMessage(msg.from, media, { caption: legenda });
 
         } catch (err) {
