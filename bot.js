@@ -1,8 +1,26 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const express = require('express'); // -----> 1. Dependência para o servidor web
+
+// -----> 2. Criação do servidor web para manter o bot online no Render
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('<h1>🤖 Bot está rodando!</h1>');
+});
+
+app.listen(port, () => {
+  console.log(`Servidor web escutando na porta ${port}`);
+});
+// Fim do trecho do servidor web
 
 const client = new Client({
     authStrategy: new LocalAuth(),
+    // -----> 3. Configuração extra para o servidor (Render) funcionar corretamente
+    puppeteer: {
+        args: ['--no-sandbox'],
+    }
 });
 
 client.on('qr', (qr) => {
@@ -13,7 +31,7 @@ client.on('ready', () => {
     console.log('🤖 Bot pronto!');
 });
 
-client.on('message', async (msg) => {
+client.on('message_create', async (msg) => {
     const texto = msg.body.toLowerCase();
 
     // 🎲 Comando genérico de dado: /1dX
@@ -73,14 +91,7 @@ Erro registrado ❗
     // 🩸 Comando de tipo sanguíneo
     if (texto === '/sangue') {
         const tiposComuns = [
-            "A+",
-            "A-",
-            "B+",
-            "B-",
-            "AB+",
-            "AB-",
-            "O+",
-            "O-"
+            "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
         ];
 
         const roll = Math.random() * 100;
@@ -115,7 +126,8 @@ O entorno da região apresenta altos índices de contaminação. Toneladas de li
 
 Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua localização costeira favorece o transporte marítimo e a movimentação clandestina de mercadorias, tornando-a uma área de interesse constante tanto para o Governo Mundial quanto para organizações independentes e facções insurgentes.`;
 
-            return await msg.reply(media, undefined, { caption: legenda });
+            return await client.sendMessage(msg.from, media, { caption: legenda });
+
         } catch (err) {
             console.error('Erro ao enviar imagem:', err);
             return msg.reply("❌ Erro ao carregar o mapa. Verifique se o arquivo *torreruptura.jpeg* está na mesma pasta do bot.js.");
@@ -124,17 +136,17 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
 
     // 📜 Comando /ficha
     if (texto === "/ficha") {
-        const ficha = `ㅤㅤㅤㅤ                                ︩︪ ׂ    ݂  🧧 𓂃
-                                          𝐅 𝐈 𝐂 𝐇 𝐀́ 𝐑 𝐈 𝐎   
-    ㅤ                               𝐑𝐮𝐩𝐭𝐮𝐫𝐚 𝐙𝐞𝐫𝐨. 
-                                                ⏝꒦︶
+        const ficha = `ㅤㅤㅤㅤ                          ︩︪ ׂ   ݂  🧧 𓂃
+                                     𝐅 𝐈 𝐂 𝐇 𝐀́ 𝐑 𝐈 𝐎   
+      ㅤ                             𝐑𝐮𝐩𝐭𝐮𝐫𝐚 𝐙𝐞𝐫𝐨. 
+                                           ⏝꒦︶
 
-         悪魔❀ Nᴏᴍᴇ: 
-         悪魔❀ 𝗜𝖽𝖺𝖉𝖊: 
-         悪魔❀ Wʜᴀᴛsᴀᴘᴘ: 
-         悪魔❀ Bʟᴏᴄᴏ: 
+        悪魔❀ Nᴏᴍᴇ: 
+        悪魔❀ 𝗜𝖽𝖺𝖉𝖊: 
+        悪魔❀ Wʜᴀᴛsᴀᴘᴘ: 
+        悪魔❀ Bʟᴏᴄᴏ: 
 
-‘( 穆 )    𝐏ersonagem.
+‘( 穆 )   𝐏ersonagem.
  ׄ🧧˳໋  Nᴏᴍᴇ: 
  ׄ🧧˳໋  Lɪɴʜᴀɢᴇᴍ: 
  ׄ🧧˳໋  Iᴅᴀᴅᴇ: 
@@ -151,7 +163,7 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
  ׄ🧧˳໋  Tɪᴘᴏ Sᴀɴɢᴜɪ́ɴᴇᴏ: 
  ׄ🧧˳໋  Cᴏᴍᴘʟᴇᴍᴇɴᴛᴏs: 
 
-‘( 穆 )   𝐌onetάrio e 𝐏rogressα̃o.
+‘( 穆 )   𝐌onetάrio e 𝐏rogressα̃o.
  ׄ🧧˳໋  Nɪ́ᴠᴇʟ: 00
  ׄ🧧˳໋  𝐗𝐏: 00
  ׄ🧧˳໋  Cʀᴇ́ᴅɪᴛᴏs (Monetário): 00
@@ -163,16 +175,16 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
 𝑰𝑰  —
  ׄ🧧˳໋  Tᴇ́ᴄɴɪᴄᴀs Dɪᴠᴇʀɢᴇɴᴛᴇs:
 ⤿ (nome da hab. núcleo.)
-           ──── (todas as suas skills. Adicione mais travessão se necessário) 
+          ──── (todas as suas skills. Adicione mais travessão se necessário) 
 ⤿ (nome da hab. núcleo)
-           ──── (todas as suas skills. Adicione mais travessão se necessário) 
+          ──── (todas as suas skills. Adicione mais travessão se necessário) 
  ׄ🧧˳໋  Pᴀssɪᴠᴀs: 
 ⤿ (nome da origem: classe, raça, etc)
-           ──── (todas as suas passivas. Adicione mais travessão se necessário) 
+          ──── (todas as suas passivas. Adicione mais travessão se necessário) 
 ⤿ (nome da origem: classe, raça, etc)
-           ──── (todas as suas passivas. Adicione mais travessão se necessário) 
+          ──── (todas as suas passivas. Adicione mais travessão se necessário) 
 
-‘( 穆 )    𝐀tributos.
+‘( 穆 )   𝐀tributos.
 ㅤ  ׄ🧧˳໋ Fᴏʀᴄ̧ᴀ ꢁ O1
 ㅤ  ׄ🧧˳໋ Rᴇssɪsᴛᴇ̂ɴᴄɪᴀ ꢁ O1
 ㅤ  ׄ🧧˳໋ Aɢɪʟɪᴅᴀᴅᴇ ꢁ O1

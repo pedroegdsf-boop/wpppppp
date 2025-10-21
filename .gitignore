@@ -13,3 +13,6 @@ yarn-error.log*
 # Arquivos de sistema
 .DS_Store
 Thumbs.db
+
+# Sessão de autenticação do WhatsApp
+/.wwebjs_auth
