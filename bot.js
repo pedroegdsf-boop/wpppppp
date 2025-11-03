@@ -1,6 +1,8 @@
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
-const qrcode = require('qrcode'); // Usando a biblioteca 'qrcode'
+const qrcode = require('qrcode');
 const express = require('express');
+
+console.log('[LOG] Script iniciado...');
 
 // --- Início do Servidor Web (para o Render) ---
 const app = express();
@@ -11,7 +13,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor web escutando na porta ${port}`);
+  console.log(`[LOG] Servidor web escutando na porta ${port}`);
 });
 // --- Fim do Servidor Web ---
 
@@ -26,8 +28,11 @@ const client = new Client({
     }
 });
 
+console.log("[LOG] Objeto 'client' do WhatsApp criado.");
+
 // --- Início da Geração do QR Code como Link de Imagem ---
 client.on('qr', (qr) => {
+  console.log('[LOG] Evento QR recebido. Gerando link de imagem...');
   qrcode.toDataURL(qr, (err, url) => {
     if(err) throw err;
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
@@ -42,14 +47,16 @@ client.on('qr', (qr) => {
 // --- Fim da Geração do QR Code ---
 
 client.on('ready', () => {
-    console.log('🤖 Bot pronto!');
+    console.log('🤖 Bot pronto! Conectado e ouvindo mensagens.');
 });
 
-client.on('message_create', async (msg) => {
-    // #################### LINHA ESPIÃ ####################
-    // Esta é a linha que vai nos dizer se as mensagens estão chegando
+// ######################################################################
+// AQUI ESTÁ A GRANDE MUDANÇA
+// Criamos uma função separada para 'cuidar' das mensagens
+// ######################################################################
+async function handleMessage(msg) {
+    // Nossa "linha espiã" agora está aqui
     console.log(`[LOG ESPIÃO] Mensagem recebida de: ${msg.from} | Texto: ${msg.body}`);
-    // #####################################################
 
     const texto = msg.body.toLowerCase();
 
@@ -148,7 +155,7 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
             return await client.sendMessage(msg.from, media, { caption: legenda });
 
         } catch (err) {
-            console.error('Erro ao enviar imagem:', err);
+            console.error('[ERRO NO /MAPA]', err); // Log de erro melhorado
             return msg.reply("❌ Erro ao carregar o mapa. Verifique se o arquivo *torreruptura.jpeg* está na mesma pasta do bot.js.");
         }
     }
@@ -161,6 +168,15 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
 
         await msg.reply(ficha);
     }
-});
+}
 
+// ######################################################################
+// Agora, mandamos o bot escutar nos DOIS canais (o antigo e o novo)
+// e ambos vão usar a mesma função 'handleMessage'
+// ######################################################################
+client.on('message_create', handleMessage);
+client.on('message', handleMessage);
+
+
+console.log("[LOG] Iniciando cliente... (client.initialize())");
 client.initialize();
