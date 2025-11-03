@@ -51,13 +51,12 @@ client.on('ready', () => {
 });
 
 // ######################################################################
-// AQUI ESTÁ A GRANDE MUDANÇA
-// Criamos uma função separada para 'cuidar' das mensagens
+// MUDANÇA ESTRATÉGICA: Vamos testar os listeners SEPARADAMENTE
 // ######################################################################
-async function handleMessage(msg) {
-    // Nossa "linha espiã" agora está aqui
-    console.log(`[LOG ESPIÃO] Mensagem recebida de: ${msg.from} | Texto: ${msg.body}`);
 
+// Listener NOVO ('message_create') - Com toda a sua lógica
+client.on('message_create', async (msg) => {
+    console.log(`[LOG ESPIÃO 'message_create'] Mensagem recebida: ${msg.body}`);
     const texto = msg.body.toLowerCase();
 
     // 🎲 Comando genérico de dado: /1dX
@@ -168,14 +167,13 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
 
         await msg.reply(ficha);
     }
-}
+});
 
-// ######################################################################
-// Agora, mandamos o bot escutar nos DOIS canais (o antigo e o novo)
-// e ambos vão usar a mesma função 'handleMessage'
-// ######################################################################
-client.on('message_create', handleMessage);
-client.on('message', handleMessage);
+// Listener ANTIGO ('message') - Apenas com um log
+client.on('message', async (msg) => {
+    console.log(`[LOG ESPIÃO 'message'] Mensagem recebida: ${msg.body}`);
+    // Este é um "ouvido" extra. Se este log aparecer, saberemos que o evento correto é 'message'
+});
 
 
 console.log("[LOG] Iniciando cliente... (client.initialize())");
