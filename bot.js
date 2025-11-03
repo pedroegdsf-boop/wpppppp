@@ -30,9 +30,11 @@ const client = new Client({
 
 console.log("[LOG] Objeto 'client' do WhatsApp criado.");
 
-// --- Início da Geração do QR Code como Link de Imagem ---
-client.on('qr', (qr) => {
-  console.log('[LOG] Evento QR recebido. Gerando link de imagem...');
+// ######################################################################
+// AQUI ESTÁ A MUDANÇA: Usamos .once() para rodar UMA ÚNICA VEZ
+// ######################################################################
+client.once('qr', (qr) => {
+  console.log('[LOG] Evento QR recebido. Gerando link de imagem UMA ÚNICA VEZ...');
   qrcode.toDataURL(qr, (err, url) => {
     if(err) throw err;
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
@@ -50,8 +52,9 @@ client.on('ready', () => {
     console.log('🤖 Bot pronto! Conectado e ouvindo mensagens.');
 });
 
+
 // ######################################################################
-// MUDANÇA ESTRATÉGICA: Vamos testar os listeners SEPARADAMENTE
+// Teste dos listeners SEPARADOS
 // ######################################################################
 
 // Listener NOVO ('message_create') - Com toda a sua lógica
@@ -172,7 +175,6 @@ Apesar da precariedade, a Zona Oeste mantém relevância geopolítica. Sua local
 // Listener ANTIGO ('message') - Apenas com um log
 client.on('message', async (msg) => {
     console.log(`[LOG ESPIÃO 'message'] Mensagem recebida: ${msg.body}`);
-    // Este é um "ouvido" extra. Se este log aparecer, saberemos que o evento correto é 'message'
 });
 
 
